@@ -1,0 +1,28 @@
+# Google Cloud Build 자동 배포 설정
+# GitHub 푸시 시 자동으로 Cloud Functions에 배포
+
+steps:
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - functions
+      - deploy
+      - discord-webhook-server
+      - --source=.
+      - --entry-point=discord_webhook
+      - --runtime=python311
+      - --trigger=http
+      - --allow-unauthenticated
+      - --memory=512MB
+      - --timeout=60s
+      - --max-instances=100
+      - --min-instances=0
+      - --set-env-vars=WEBHOOK_GENERAL=${_WEBHOOK_GENERAL}
+      - --set-env-vars=WEBHOOK_ALERTS=${_WEBHOOK_ALERTS}
+      - --set-env-vars=WEBHOOK_LOGS=${_WEBHOOK_LOGS}
+
+# 환경변수 치환 (Cloud Build 트리거에서 설정)
+substitutions:
+  _WEBHOOK_GENERAL: ''  # Cloud Build에서 실제 값 설정
+  _WEBHOOK_ALERTS: ''   # Cloud Build에서 실제 값 설정  
+  _WEBHOOK_LOGS: ''     # Cloud Build에서 실제 값 설정

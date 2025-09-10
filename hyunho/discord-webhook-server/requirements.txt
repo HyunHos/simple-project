@@ -1,0 +1,6 @@
+# Google Cloud Functions 전용 의존성
+fastapi==0.104.1
+pydantic==2.5.0
+requests==2.31.0
+functions-framework==3.5.0
+httpx==0.25.0
