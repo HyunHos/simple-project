@@ -179,6 +179,28 @@ curl -X POST localhost:8080/api/webhook/general \
 - [Google Cloud Functions 문서](https://cloud.google.com/functions/docs)
 - [FastAPI 문서](https://fastapi.tiangolo.com/)
 
+## 📝 TODO
+
+### 자동화 연동
+- [ ] **Git Hook + Notion API**: 커밋 이벤트 발생 시 노션 데이터베이스에 자동 로깅
+- [ ] **GitHub Actions + Notion**: 푸시/PR 이벤트를 노션 페이지로 생성
+- [ ] **Discord Webhook Server 확장**: 노션 API 연동 엔드포인트 추가
+- [ ] **커밋 정보 수집**: 작성자, 메시지, 변경 파일, 시간 등 메타데이터 추출
+- [ ] **노션 템플릿 설계**: 커밋 로그용 데이터베이스/페이지 구조 정의
+
+### 개선사항
+- [ ] **테스트 코드 작성**: 단위 테스트 및 통합 테스트 추가
+- [ ] **로깅 시스템**: 요청/응답 로깅 및 모니터링 기능
+- [ ] **인증/권한 관리**: API 키 기반 접근 제어
+- [ ] **Rate Limiting**: 요청 제한 및 남용 방지
+- [ ] **에러 알림**: Discord로 서버 에러 자동 알림
+
+### 기능 확장
+- [ ] **Slack 연동**: Slack webhook 지원 추가
+- [ ] **메시지 템플릿**: 자주 사용하는 메시지 형태 템플릿화
+- [ ] **스케줄링**: 예약 메시지 전송 기능
+- [ ] **웹 대시보드**: 웹훅 관리 UI 제공
+
 ## 📝 라이센스
 
 MIT License
