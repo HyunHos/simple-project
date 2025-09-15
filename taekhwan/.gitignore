@@ -1,0 +1,56 @@
+# Byte-code files
+*.pyc
+__pycache__/
+*.pyd
+*.pyo
+*.egg-info/
+.Python
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Distribution / build files
+.eggs/
+*.egg
+dist/
+build/
+*.whl
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# IDE-specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*.bak
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Jupyter Notebook files
+.ipynb_checkpoints
+
+# MyPy
+.mypy_cache/
+
+# PyInstaller
+*.spec
