@@ -9,9 +9,9 @@ import os
 import shutil
 import time
 
-def fetch_chrome_blog_titles():
+def fetch_chrome_blog_posts():
     """
-    Fetches titles using Selenium, handling cookie banners and dynamic content.
+    Fetches post titles and URLs using Selenium, handling cookie banners and dynamic content.
     """
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -28,7 +28,7 @@ def fetch_chrome_blog_titles():
 
     chrome_options.add_argument(f"--user-data-dir={temp_dir}")
 
-    post_titles = []
+    blog_posts = []
     driver = None
     try:
         service = Service()
@@ -51,21 +51,39 @@ def fetch_chrome_blog_titles():
             pass
         # -----------------------------------------
 
-        # Now, wait for the actual content to load
+        # Wait for the dynamically loaded cards to be present
         WebDriverWait(driver, 20).until(
-            EC.presence_of_all_elements_located((By.CLASS_NAME, "dgc-card"))
+            EC.presence_of_all_elements_located((By.CLASS_NAME, "devsite-card-wrapper"))
         )
 
         page_source = driver.page_source
         soup = BeautifulSoup(page_source, "html.parser")
-        posts = soup.find_all("div", class_="dgc-card", limit=5)
+        
+        # Find the new card elements
+        posts = soup.find_all("div", class_="devsite-card-wrapper", limit=5)
         for post in posts:
-            title_element = post.find("h2", class_="dgc-card__title")
-            if title_element:
-                post_titles.append(title_element.get_text(strip=True))
+            # The title and URL are available as attributes on the wrapper element.
+            if 'displaytitle' in post.attrs and 'url' in post.attrs:
+                title = post['displaytitle']
+                url = post['url']
+                # Ensure the URL is absolute
+                if not url.startswith('http'):
+                    url = f"https://developer.chrome.com{url}"
+                blog_posts.append({'title': title, 'url': url})
 
     except Exception as e:
         print(f"An error occurred during scraping: {e}")
+        if driver:
+            # Save the page source for debugging when an error occurs
+            try:
+                # Fix: Save the debug file inside the script's directory
+                script_dir = os.path.dirname(os.path.abspath(__file__))
+                debug_file_path = os.path.join(script_dir, "debug_page_source.html")
+                with open(debug_file_path, "w", encoding="utf-8") as f:
+                    f.write(driver.page_source)
+                print(f"Saved page source to {debug_file_path} for analysis.")
+            except Exception as write_e:
+                print(f"Failed to write debug file: {write_e}")
     finally:
         if driver:
             driver.quit()
@@ -73,4 +91,4 @@ def fetch_chrome_blog_titles():
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
 
-    return post_titles
+    return blog_posts
