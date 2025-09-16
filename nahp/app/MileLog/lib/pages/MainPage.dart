@@ -15,13 +15,13 @@ class MainPage extends StatelessWidget {
             children: [
               InkWell(
                 onTap: () {
-                  CommonUtils.instance.showMessage(context, "test");
+                  CommonUtils.instance.showMessage(context, "test2");
                 },
                 child: Container(
                   color: Colors.blue,
                   width: 200,
                   height: 50,
-                  child: Center(child: Text("test")),
+                  child: Center(child: Text("test2")),
                 ),
               ),
             ],
