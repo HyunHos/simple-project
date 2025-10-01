@@ -1,0 +1,71 @@
+name: Code Review (Gemini)
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    env:
+      API_URL: https://shiny-tribble-7v64rpg9v963xj97-8000.app.github.dev/
+      API_TOKEN: ${{ secrets.REVIEW_API_TOKEN }}
+      REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Collect changed files (GitHub API)
+        id: diff
+        run: |
+          files_json=$(gh api "repos/$REPO/pulls/$PR_NUMBER/files?per_page=100" --paginate -q '.[]' \
+            | jq -s '[.[] | {
+                path: .filename,
+                status: .status,
+                patch: (.patch // ""),
+                additions: .additions,
+                deletions: .deletions,
+                previous_filename: (.previous_filename // null)
+              }]')
+          echo "files=$(echo "$files_json" | tr -d '\n')" >> "$GITHUB_OUTPUT"
+
+      - name: Build payload
+        id: payload
+        run: |
+          payload=$(jq -n \
+            --arg repo "${REPO}" \
+            --argjson pr_number ${PR_NUMBER} \
+            --arg title "${{ github.event.pull_request.title }}" \
+            --arg description "${{ github.event.pull_request.body }}" \
+            --arg base_sha "${{ github.event.pull_request.base.sha }}" \
+            --arg head_sha "${{ github.event.pull_request.head.sha }}" \
+            --arg author "${{ github.event.pull_request.user.login }}" \
+            --argjson changed_files "${{ steps.diff.outputs.files }}" \
+            '{repo:$repo, pr_number:$pr_number, title:$title, description:$description, base_sha:$base_sha, head_sha:$head_sha, author:$author, changed_files:$changed_files}')
+          echo "json=$payload" >> "$GITHUB_OUTPUT"
+
+      - name: Call Review API
+        if: env.API_URL != ''
+        run: |
+          API="${API_URL%/}"
+          headers=(-H 'Content-Type: application/json')
+          if [ -n "$API_TOKEN" ]; then
+            headers+=(-H "X-Auth-Token: $API_TOKEN")
+          fi
+          curl -sS -X POST "$API/v1/review" \
+            "${headers[@]}" \
+            -d "${{ steps.payload.outputs.json }}" | tee review.json
+
+      - name: Upload API response
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: review-json
+          path: review.json
